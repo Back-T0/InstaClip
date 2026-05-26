@@ -11,6 +11,7 @@ import argparse
 import asyncio
 import json
 import logging
+import webbrowser
 
 import websockets
 from websockets.asyncio.server import ServerConnection, serve
@@ -416,7 +417,9 @@ def process_request(connection, request):
 
 async def main(host: str, port: int) -> None:
     async with serve(handler, host, port, process_request=process_request):
-        logger.info("running on http://%s:%d", host, port)
+        url = f"http://127.0.0.1:{port}"
+        logger.info("running on %s", url)
+        webbrowser.open(url)
         await asyncio.Future()  # 永久运行
 
 
