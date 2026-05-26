@@ -11,6 +11,7 @@ import argparse
 import asyncio
 import json
 import logging
+import socket
 import webbrowser
 
 import websockets
@@ -337,6 +338,7 @@ HTML = f"""\
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>InstaClip</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='20' y='15' width='60' height='75' rx='8' fill='%234f8cff'/><rect x='30' y='8' width='40' height='16' rx='8' fill='%232563eb'/><circle cx='50' cy='16' r='5' fill='%23fff'/><rect x='32' y='40' width='36' height='4' rx='2' fill='%23fff' opacity='.8'/><rect x='32' y='52' width='28' height='4' rx='2' fill='%23fff' opacity='.6'/><rect x='32' y='64' width='32' height='4' rx='2' fill='%23fff' opacity='.5'/></svg>" />
   <style>{CSS}</style>
 </head>
 <body>
@@ -415,11 +417,25 @@ def process_request(connection, request):
 # 入口
 # ---------------------------------------------------------------------------
 
+def _get_local_ips() -> list[str]:
+    """获取本机局域网 IPv4 地址。"""
+    ips: list[str] = []
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            ip = info[4][0]
+            if not ip.startswith("127.") and ip not in ips:
+                ips.append(ip)
+    except socket.gaierror:
+        pass
+    return ips
+
+
 async def main(host: str, port: int) -> None:
     async with serve(handler, host, port, process_request=process_request):
-        url = f"http://127.0.0.1:{port}"
-        logger.info("running on %s", url)
-        webbrowser.open(url)
+        logger.info("running on http://127.0.0.1:%s", port)
+        for ip in _get_local_ips():
+            logger.info("running on http://%s:%s", ip, port)
+        webbrowser.open(f"http://127.0.0.1:{port}")
         await asyncio.Future()  # 永久运行
 
 
