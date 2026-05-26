@@ -22,7 +22,12 @@ jobs:
         run: pip install websockets pyinstaller
 
       - name: Build exe
-        run: pyinstaller --onefile instaclip.py
+        run: pyinstaller --onefile --name instaclip instaclip.py
+
+      - name: Verify build
+        run: |
+          dir dist
+          if (!(Test-Path "dist\instaclip.exe")) { Write-Error "exe not found"; exit 1 }
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
