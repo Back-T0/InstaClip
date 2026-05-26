@@ -1,0 +1,6 @@
+[project]
+name = "instaclip"
+version = "1.0.0"
+description = "实时共享剪贴板"
+requires-python = ">=3.10"
+dependencies = ["websockets>=13.0"]

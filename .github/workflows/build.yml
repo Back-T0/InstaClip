@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install websockets pyinstaller
+
+      - name: Build exe
+        run: pyinstaller --onefile instaclip.py
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/instaclip.exe
+          generate_release_notes: true
+          body: |
+            ## Quick Start
+
+            Download `instaclip.exe` below, then run:
+
+            ```
+            instaclip.exe --port 8080
+            ```
+
+            Open `http://localhost:8080` in your browser. Share the URL with other devices on the same network to sync.
+
+            ## Features
+
+            - Real-time text sync across devices
+            - Image sharing (paste or open files, auto-compressed)
+            - File loading (txt, csv, md, html, json, yaml, py, js...)
+            - One-click copy to clipboard
+            - Auto reconnect with exponential backoff
+            - Dark/light mode follows system setting
+
+            ## Options
+
+            ```
+            --host 0.0.0.0    Bind address (default: 0.0.0.0)
+            --port 8080       Port number (default: 8080)
+            ```
